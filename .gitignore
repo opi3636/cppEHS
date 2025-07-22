@@ -1,0 +1,50 @@
+# Build directories
+cmake-build-*/
+build/
+out/
+bin/
+obj/
+
+# CMake files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# CLion-specific
+.idea/
+*.iml
+
+# User-specific files
+*.swp
+*.swo
+*.log
+*.user
+*.workspace
+
+# Backup files
+*~
+*.bak
+*.tmp
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Executables and object files
+*.exe
+*.out
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# Test result outputs
+Testing/
+CTestTestfile.cmake
+
+# Conan and vcpkg artifacts (if used)
+.conan/
+vcpkg_installed/
