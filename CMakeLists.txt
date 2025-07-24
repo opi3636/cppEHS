@@ -19,3 +19,4 @@ add_executable(PokerCalc src/main.cpp
         src/Card.hpp
         src/Card.cpp
 )
+

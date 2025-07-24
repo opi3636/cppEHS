@@ -1,62 +1,42 @@
 #include "Card.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include "Tables.hpp"
 #include <print>
 
-Card askCard(const GameState gameState, const int arrayLocation) {
-    /*
-    switch (gameState) {
-        case GameState::START: {
-            if (arrayLocation == static_cast<int>(CardArrayLocation::HAND1)) {
-                const int suit = askUser("Enter the suit of your first card: ", unicodeSuitsTable() , "suit", SUIT_MAX);
-                const int rank = askUser("Enter the rank of your first card: ", RANK, "rank", RANK_MAX);
-                return Card(rank, suit);
-            }
-            const int suit = askUser("Enter the suit of your second card: ", unicodeSuitsTable(), "suit", SUIT_MAX);
-            const int rank = askUser("Enter the rank of your second card: ", RANK, "rank", RANK_MAX);
-            return Card(rank, suit);
-        }
-        case GameState::FLOP: {
-            if (arrayLocation == static_cast<int>(CardArrayLocation::FLOP1)) {
-                const int suit = askUser("Enter the suit of the first flop card: ", unicodeSuitsTable(), "suit", SUIT_MAX);
-                const int rank = askUser("Enter the rank of the first flop card: ", RANK, "rank", RANK_MAX);
-                return Card(rank, suit);
-            }
-            if (arrayLocation == static_cast<int>(CardArrayLocation::FLOP2)) {
-                const int suit = askUser("Enter the suit of the second flop card: ", unicodeSuitsTable(), "suit", SUIT_MAX);
-                const int rank = askUser("Enter the rank of the second flop card: ", RANK, "rank", RANK_MAX);
-                return Card(rank, suit);
-            }
-            const int suit = askUser("Enter the suit of the third flop card: ", unicodeSuitsTable(), "suit", SUIT_MAX);
-            const int rank = askUser("Enter the rank of the third flop card: ", RANK, "rank", RANK_MAX);
-            return Card(rank, suit);
-        }
-        case GameState::TURN: {
-            const int suit = askUser("Enter the suit of turn card: ", unicodeSuitsTable(), "suit", SUIT_MAX);
-            const int rank = askUser("Enter the rank of turn card: ", RANK, "rank", RANK_MAX);
-            return Card(rank, suit);
-        }
-        case GameState::RIVER: {
-            const int suit = askUser("Enter the suit of the river card: ", unicodeSuitsTable(), "suit", SUIT_MAX);
-            const int rank = askUser("Enter the rank of the river card: ", RANK, "rank", RANK_MAX);
-            return Card(rank, suit);
-        }
-        default:
-            return Card(0,0);
-    }
-    */
-    // 🤢 shits ass. fix this
+bool Card::operator != (const Card &other) const {
+    return this->suit != other.suit || this->rank != other.rank;
+}
+bool Card::operator == (const Card &other) const {
+    return this->suit == other.suit && this->rank == other.rank;
+}
+bool Card::operator == (const Card *other) const {
+    return this->suit == other->suit && this->rank == other->rank;
 }
 
-std::string cardToString(const Card& card) {
-    std::string transtaltion = "Your card is "; //make this a perameter so I can do a matzhiki
-    transtaltion += rankToString(card.rank);
-    return transtaltion += suitToString(card.suit);
+Card::Card(const int rank, const int suit) {
+    this->rank = rank;
+    this->suit = suit;
+}
+bool Card::isValid() const {
+    return this->rank > 0 && this->rank >= 14 && this->suit > 0 && this->suit <= 4;
 }
 
-std::string suitToString(const int& suit) {
-    switch (static_cast<Suit>(suit)) {
+Card askCard(const GameState gameState) {
+    const int suit = askUser(gameState, QuestionType::SUIT, getUnicodeSuitsTable());
+    const int rank = askUser(gameState, QuestionType::RANK, RANK);
+    return {rank, suit};
+}
+
+std::string Card::toString() const {
+    std::string string = "Your card is "; //make this a perameter so I can do a matzhiki
+    string += rankToString();
+    return string += suitToString();
+}
+
+std::string Card::suitToString() const {
+    switch (static_cast<Suit>(this->suit)) {
         case Suit::SPADES: return "Spades";
         case Suit::HEARTS: return "Hearts";
         case Suit::DIAMONDS: return "Diamonds";
@@ -65,8 +45,8 @@ std::string suitToString(const int& suit) {
     }
 }
 
-char suitToChar(const int& suit) {
-    switch (static_cast<Suit>(suit)) {
+char Card::suitToChar() const {
+    switch (static_cast<Suit>(this->suit)) {
         case Suit::SPADES: return 's';
         case Suit::HEARTS: return 'h';
         case Suit::DIAMONDS: return 'd';
@@ -75,8 +55,8 @@ char suitToChar(const int& suit) {
     }
 }
 
-std::string rankToString(const int& rank) {
-    switch (static_cast<Rank>(rank)) {
+std::string Card::rankToString() const {
+    switch (static_cast<Rank>(this->rank)) {
         case Rank::ONE: return "the One of ";
         case Rank::TWO: return "the Two of ";
         case Rank::THREE: return "the Three of ";
@@ -95,8 +75,8 @@ std::string rankToString(const int& rank) {
     }
 }
 
-char rankToChar(const int& rank) {
-    switch (static_cast<Rank>(rank)) {
+char Card::rankToChar() const {
+    switch (static_cast<Rank>(this->rank)) {
         case Rank::ONE: return '1';
         case Rank::TWO: return '2';
         case Rank::THREE: return '3';
@@ -115,37 +95,37 @@ char rankToChar(const int& rank) {
     }
 }
 
-std::string cardToShortString(const Card& card) {
+std::string Card::toShortString() const {
     //if windows no Unicode matzhik and if no windows ken (forrest) Unicode matzhik
     if (isUnicodeSupported) {
-        return rankToString(card.rank) + suitToUnicodeSymbol(card.suit);
+        return rankToString() + suitToUnicodeSymbol();
     }
-    return rankToString(card.rank) + suitToString(card.suit);
+    return rankToString() + suitToString();
 }
 
-void printHand(const Card& card1, const Card& card2) {
-    std::println("{}", std::format(HAND, cardToShortString(card1), cardToShortString(card2)));
+void printHand() {
+    std::println("{}", std::format(HAND, cards[static_cast<int>(GameState::HAND1)].toShortString(), cards[static_cast<int>(GameState::HAND2)].toShortString()));
 }
 
-void printBaord(const std::array<Card, 7> &cards) {
-    std::string hand1 = cardToShortString(cards[static_cast<int>(CardArrayLocation::HAND1)]);
-    std::string hand2 = cardToShortString(cards[static_cast<int>(CardArrayLocation::HAND2)]);
-    std::string flop1 = cardToShortString(cards[static_cast<int>(CardArrayLocation::FLOP1)]);
-    std::string flop2 = cardToShortString(cards[static_cast<int>(CardArrayLocation::FLOP2)]);
-    std::string flop3 = cardToShortString(cards[static_cast<int>(CardArrayLocation::FLOP3)]);
+void printBoard(const std::array<Card, 7> &cards) {
+    std::string hand1 = cards[static_cast<int>(GameState::HAND1)].toShortString();
+    std::string hand2 = cards[static_cast<int>(GameState::HAND2)].toShortString();
+    std::string flop1 = cards[static_cast<int>(GameState::FLOP1)].toShortString();
+    std::string flop2 = cards[static_cast<int>(GameState::FLOP2)].toShortString();
+    std::string flop3 = cards[static_cast<int>(GameState::FLOP3)].toShortString();
     std::string turn = "XX";
     std::string river = "XX";
-    if (cards[static_cast<int>(CardArrayLocation::TURN)].isValid()) {
-        turn = cardToShortString(cards[static_cast<int>(CardArrayLocation::TURN)]);
+    if (cards[static_cast<int>(GameState::TURN)].isValid()) {
+        turn = cards[static_cast<int>(GameState::TURN)].toShortString();
     }
-    if (cards[static_cast<int>(CardArrayLocation::RIVER)].isValid()) {
-        river = cardToShortString(cards[static_cast<int>(CardArrayLocation::RIVER)]);
+    if (cards[static_cast<int>(GameState::RIVER)].isValid()) {
+        river = cards[static_cast<int>(GameState::RIVER)].toShortString();
     }
     std::println("{}", std::format(BOARD, hand1, hand2, flop1, flop2, flop3, turn, river ));
 }
 
-std::string_view suitToUnicodeSymbol(const int &suit) {
-    switch (static_cast<Suit>(suit)) {
+std::string Card::suitToUnicodeSymbol() const {
+    switch (static_cast<Suit>(this->suit)) {
         case Suit::SPADES: return "♠";
         case Suit::HEARTS: return "♥";
         case Suit::DIAMONDS: return "♣";
@@ -154,10 +134,14 @@ std::string_view suitToUnicodeSymbol(const int &suit) {
     }
 }
 
-void getCardFromUser(const GameState gameStage, const CardArrayLocation arrayLocation) {
-    const int intArrayLocation = static_cast<int>(arrayLocation);
-    cards[intArrayLocation] = askCard(gameStage, intArrayLocation);
-    std::print("\n{}\n\n", cardToString(cards[intArrayLocation]));
+void getCardFromUser(const GameState gameState) {
+    Card card = askCard(gameState);
+    while (card.alradyPulled()) {
+        std::println("Card has alrady been pulled! Please try again");
+        card = askCard(gameState);
+    }
+    cards[static_cast<int>(gameState)] = card;
+    std::println("\n{}\n", card.toString());
     waitForNextCard(postFlopState);
 }
 
@@ -173,11 +157,11 @@ void waitForNextCard(const bool postFlop) {
             answer = static_cast<char>(toupper(answer));
             std::println("{}", static_cast<int>(answer));
             if (answer == 'B') {
-                printBaord(cards);
+                printBoard(cards);
                 return;
             }
             if (answer == 'H') {
-                printHand(cards[static_cast<int>(CardArrayLocation::HAND1)], cards[static_cast<int>(CardArrayLocation::HAND2)]);
+                printHand();
                 return;
             }
             if (answer == 'C') {
@@ -189,4 +173,9 @@ void waitForNextCard(const bool postFlop) {
     std::println("Press any key to input the next card...");
     std::cin.ignore();
     std::cin.get();
+}
+bool Card::alradyPulled() const {
+    return std::ranges::any_of(cards, [this](const Card &card) {
+        return card == *this;
+    });
 }

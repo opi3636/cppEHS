@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <string_view>
 
 constexpr std::string_view SUIT =
     "-----------------\n"
@@ -66,4 +66,4 @@ constexpr std::string_view UNICODE_CHECK =
     "|  [8] 🧠 (brain)              |\n"
     "-------------------------------";
 
-std::string_view unicodeSuitsTable();
+std::string_view getUnicodeSuitsTable();
