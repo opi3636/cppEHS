@@ -49,7 +49,7 @@ void checkUnicode() {
     std::println("{}", UNICODE_CHECK);
     char answer;
     while (true) {
-        std::print("Are you able to see these soymbols correctly (colors do not matter)? [y/n]: ");
+        std::print("Are you able to see these symbols correctly (colors do not matter)? [y/n]: ");
         std::cin >> answer;
         answer = static_cast<char>(std::toupper(answer));
         if (answer == 'Y') {
