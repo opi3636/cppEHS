@@ -7,9 +7,6 @@
 #define SUIT_MAX 4
 #define RANK_MAX 14
 
-/*
- * !! Refactor and make Card a class instead of a struct !!
- */
 class Card {
 public:
     Card(int rank, int suit);
@@ -47,14 +44,10 @@ enum class Rank {
 };
 
 
-inline std::array<Card, 7> cards {}; //maybe make this a vector? //no need, just needed to add default constructor
+inline std::array<Card, 7> cards {};
 
 Card askCard(GameState gameState);
 void getCardFromUser(GameState gameStage);
-
-// func that accepts a varible amount(called ellipsis) of Card& and prints their string value. depends on cardToString fix
-// func that takes the whole cards array and prints the board (hopefully as a nice table. std::format should be able to format predefined strings, its 4AM I don't want to test that rn)
-
 void printHand();
 void printBoard (const std::array<Card, 7>& cards);
 

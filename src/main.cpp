@@ -1,16 +1,20 @@
 #include <iostream>
-
+#include <print>
+#include <random>
 #include "Poker.hpp"
 #include "Card.hpp"
 #include "Tables.hpp"
-#include <print>
-#include <thread>
+
 
 int main() {
     checkUnicode();
     getHandAndFlop();
     getTurnAndRiver();
+    if (const bool playAgain = askYesNo("Do you wish to play again?", true); !playAgain) {
+        quitGame();
+    }
 }
+
 int askUser(const GameState &gameState, const QuestionType &questionType, const std::string_view &question) {
     std::println("{}", question);
     std::print("Please enter the {0} of the {1} card: ", questionTypeToString(questionType), gameStateToString(gameState));
@@ -28,10 +32,11 @@ int askUser(const GameState &gameState, const QuestionType &questionType, const 
     }
     return answer;
 }
-void exit() {
+void quitGame() {
     std::println("Press any key to exit...");
     std::cin.ignore();
     std::cin.get();
+    exit(0);
 }
 
 void getHandAndFlop() {
@@ -39,8 +44,8 @@ void getHandAndFlop() {
     getCardFromUser(GameState::HAND2);
     getCardFromUser(GameState::FLOP1);
     getCardFromUser(GameState::FLOP2);
-    getCardFromUser(GameState::FLOP3);
     postFlopState = true;
+    getCardFromUser(GameState::FLOP3);
 }
 
 void getTurnAndRiver() {
@@ -50,21 +55,7 @@ void getTurnAndRiver() {
 
 void checkUnicode() {
     std::println("{}", UNICODE_CHECK);
-    char answer;
-    while (true) {
-        std::print("Are you able to see these symbols correctly (colors do not matter)? [y/n]: ");
-        std::cin >> answer;
-        answer = static_cast<char>(std::toupper(answer));
-        if (answer == 'Y') {
-            isUnicodeSupported = true;
-            break;
-        }
-        if (answer == 'N') {
-            isUnicodeSupported = false;
-            break;
-        }
-        std::println("Invalid input!");
-    }
+    isUnicodeSupported = askYesNo("Are you able to see these symbols correctly?", false);
 }
 
 std::string_view getUnicodeSuitsTable() {
@@ -86,15 +77,57 @@ std::string gameStateToString(const GameState &gameState) {
             return "second flop";
         case GameState::FLOP3:
             return "third flop";
+        case GameState::RIVER:
+            return "river";
+        case GameState::TURN:
+            return "turn";
         default:
             return "invalid game state";
     }
 }
 
-std::string questionTypeToString(const QuestionType &questionType) {
+std::string questionTypeToString(const QuestionType& questionType) {
     if (questionType == QuestionType::RANK) {
         return "rank";
     }
     return "suit";
 }
 
+void createDummyHandAndFlop() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution rank(0, 14);
+    std::uniform_int_distribution suit(0, 4);
+    cards[static_cast<int>(GameState::HAND1)] = Card(rank(gen), suit(gen));
+    cards[static_cast<int>(GameState::HAND2)] = Card(rank(gen), suit(gen));
+    cards[static_cast<int>(GameState::FLOP1)] = Card(rank(gen), suit(gen));
+    cards[static_cast<int>(GameState::FLOP2)] = Card(rank(gen), suit(gen));
+    cards[static_cast<int>(GameState::FLOP3)] = Card(rank(gen), suit(gen));
+    postFlopState = true;
+}
+
+bool askYesNo(const std::string& question, const bool defaultYes) {
+    std::string suffix = " [y/N]: ";
+    if (defaultYes) {
+        suffix = " [Y/n]: ";
+    }
+    while (true) {
+        std::print("{}", question + suffix);
+        std::string answer;
+        std::getline(std::cin, answer);
+        std::transform(answer.begin(), answer.end(), answer.begin(), toupper);
+        if (answer.empty() && defaultYes) {
+            return true;
+        }
+        if (answer.empty()) {
+            return false;
+        }
+        if (answer == "N") {
+            return false;
+        }
+        if (answer == "N") {
+            return false;
+        }
+        std::println("Invalid input!");
+    }
+}

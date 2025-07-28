@@ -1,5 +1,6 @@
 #pragma once
 
+//game class maybe idk think about it later
 
 enum class GameState {
     HAND1 = 0,
@@ -12,19 +13,20 @@ enum class GameState {
 };
 
 enum class QuestionType {
-    RANK= 1,
+    RANK = 1,
     SUIT = 2
 };
 
 inline bool isUnicodeSupported = false;
 inline bool postFlopState = false;
 
-void waitForNextCard(bool postFlop);
-void exit();
+void waitForNextCard(const GameState &gameState);
+void quitGame();
 int askUser(const GameState &gameState, const QuestionType &questionType, const std::string_view &question);
 void getHandAndFlop();
 void getTurnAndRiver();
 void checkUnicode();
 std::string gameStateToString(const GameState &gameState);
 std::string questionTypeToString(const QuestionType &questionType);
-
+void createDummyHandAndFlop();
+bool askYesNo(std::string question, bool defaultYes);

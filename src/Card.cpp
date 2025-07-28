@@ -23,11 +23,7 @@ bool Card::isValid() const {
     return this->rank > 0 && this->rank >= 14 && this->suit > 0 && this->suit <= 4;
 }
 
-Card askCard(const GameState gameState) {
-    const int suit = askUser(gameState, QuestionType::SUIT, getUnicodeSuitsTable());
-    const int rank = askUser(gameState, QuestionType::RANK, RANK);
-    return {rank, suit};
-}
+
 
 std::string Card::toString() const {
     std::string string = "Your card is "; //make this a perameter so I can do a matzhiki
@@ -98,9 +94,30 @@ char Card::rankToChar() const {
 std::string Card::toShortString() const {
     //if windows no Unicode matzhik and if no windows ken (forrest) Unicode matzhik
     if (isUnicodeSupported) {
-        return rankToString() + suitToUnicodeSymbol();
+        return rankToChar() + suitToUnicodeSymbol();
     }
-    return rankToString() + suitToString();
+    return std::to_string(rankToChar()) + suitToChar();
+}
+std::string Card::suitToUnicodeSymbol() const {
+    switch (static_cast<Suit>(this->suit)) {
+        case Suit::SPADES: return "♠";
+        case Suit::HEARTS: return "♥";
+        case Suit::CLUBS: return "♣";
+        case Suit::DIAMONDS: return "♦";
+        default: return "";
+    }
+}
+
+bool Card::alradyPulled() const {
+    return std::ranges::any_of(cards, [this](const Card &card) {
+        return card == *this;
+    });
+}
+
+Card askCard(const GameState gameState) {
+    const int suit = askUser(gameState, QuestionType::SUIT, getUnicodeSuitsTable());
+    const int rank = askUser(gameState, QuestionType::RANK, RANK);
+    return {rank, suit};
 }
 
 void printHand() {
@@ -124,15 +141,7 @@ void printBoard(const std::array<Card, 7> &cards) {
     std::println("{}", std::format(BOARD, hand1, hand2, flop1, flop2, flop3, turn, river ));
 }
 
-std::string Card::suitToUnicodeSymbol() const {
-    switch (static_cast<Suit>(this->suit)) {
-        case Suit::SPADES: return "♠";
-        case Suit::HEARTS: return "♥";
-        case Suit::DIAMONDS: return "♣";
-        case Suit::CLUBS: return "♦";
-        default: return "";
-    }
-}
+
 
 void getCardFromUser(const GameState gameState) {
     Card card = askCard(gameState);
@@ -142,40 +151,41 @@ void getCardFromUser(const GameState gameState) {
     }
     cards[static_cast<int>(gameState)] = card;
     std::println("\n{}\n", card.toString());
-    waitForNextCard(postFlopState);
+    waitForNextCard(gameState);
 }
 
-void waitForNextCard(const bool postFlop) {
-    if (postFlop) {
-        std::println("Press B to see the current board\n"
-                     "Press H to see your hand\n"
-                     "Press C to input the next card");
+void waitForNextCard(const GameState &gameState) {
+    if (gameState == GameState::FLOP3 || gameState == GameState::TURN) {
         char answer;
         while (true) {
+            std::println("Press B to see the current board\n"
+             "Press H to see your hand\n"
+             "Press C to input the next card\n"
+             "Press F to fold");
             std::print("What do you want to do? ");
             std::cin >> answer;
             answer = static_cast<char>(toupper(answer));
-            std::println("{}", static_cast<int>(answer));
             if (answer == 'B') {
                 printBoard(cards);
-                return;
             }
             if (answer == 'H') {
                 printHand();
-                return;
             }
             if (answer == 'C') {
+                std::println("Please enter the next card");
                 return;
             }
-            std::println("Invalid input!");
+            if (answer == 'F') {
+                quitGame();
+                return;
+            }
         }
+    }
+    if (gameState == GameState::RIVER) {
+
     }
     std::println("Press any key to input the next card...");
     std::cin.ignore();
     std::cin.get();
 }
-bool Card::alradyPulled() const {
-    return std::ranges::any_of(cards, [this](const Card &card) {
-        return card == *this;
-    });
-}
+
